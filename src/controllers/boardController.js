@@ -8,7 +8,7 @@ const createNew = async (req, res, next) => {
       message: 'POST board request succeeded'
     })
   } catch (error) {
-    res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ error: error.message })
+    next(error)
   }
 }
 
