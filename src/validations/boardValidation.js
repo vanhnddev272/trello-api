@@ -16,13 +16,8 @@ const createNew = async (req, res, next) => {
   })
 
   try {
-    console.log(req.body)
-
     await correctCondition.validateAsync(req.body, { abortEarly: false })
-    // next()
-    res.status(StatusCodes.OK).json({
-      message: 'POST board request succeeded'
-    })
+    next()
   } catch (error) {
     res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ error: new Error(error).message })
   }
