@@ -1,12 +1,13 @@
 import express from 'express'
 import exitHook from 'async-exit-hook'
-import { CLOSE_DB, CONNECT_DB, GET_DB } from '~/config/mongodb'
+import { CLOSE_DB, CONNECT_DB } from '~/config/mongodb'
 import { env } from '~/config/environment'
 import { API_V1 } from '~/routes/v1'
 
 const START_SERVER = () => {
   const app = express()
 
+  app.use(express.json())
   app.use('/v1', API_V1)
 
   app.listen(env.APP_PORT, () => {
