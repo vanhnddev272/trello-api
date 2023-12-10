@@ -1,6 +1,7 @@
 //
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
+import { boardController } from '~/controllers/boardController'
 import { boardValidation } from '~/validations/boardValidation'
 const router = express.Router()
 
@@ -10,6 +11,6 @@ router.route('/')
       message: 'API v1 get route.'
     })
   })
-  .post(boardValidation.createNew)
+  .post(boardValidation.createNew, boardController.createNew)
 
 export const boardRoutes = router
