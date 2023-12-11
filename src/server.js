@@ -4,6 +4,7 @@ import { CLOSE_DB, CONNECT_DB } from '~/config/mongodb'
 import { env } from '~/config/environment'
 import { API_V1 } from '~/routes/v1'
 import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware'
+import { formatters } from './utils/formatters'
 
 const START_SERVER = () => {
   const app = express()
@@ -14,7 +15,7 @@ const START_SERVER = () => {
 
   app.listen(env.APP_PORT, () => {
     // eslint-disable-next-line no-console
-    console.log(`Hello guys, I am running at http://${ env.APP_HOST }:${ env.APP_PORT }/`)
+    console.log(`Hello guys, I am running at http://${ env.APP_HOST }:${ env.APP_PORT }/ at ${ formatters.formatted_date() }`)
   })
 
   exitHook(() => {

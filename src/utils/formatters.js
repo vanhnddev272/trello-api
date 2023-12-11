@@ -1,4 +1,4 @@
-export const slugify = (val) => {
+const slugify = (val) => {
   if (!val) return ''
   return String(val)
     .normalize('NFKD') // split accented characters into their base characters and diacritical marks
@@ -8,4 +8,18 @@ export const slugify = (val) => {
     .replace(/[^a-z0-9 -]/g, '') // remove non-alphanumeric characters
     .replace(/\s+/g, '-') // replace spaces with hyphens
     .replace(/-+/g, '-') // remove consecutive hyphens
+}
+
+const formatted_date = () => {
+  let result=''
+  let d = new Date()
+  result += d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() +
+             ' '+ d.getHours() + ':' + d.getMinutes() + ':' +
+             d.getSeconds() + ' ' + d.getMilliseconds()
+  return result
+}
+
+export const formatters = {
+  slugify,
+  formatted_date
 }
