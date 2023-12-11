@@ -1,11 +1,11 @@
 /* eslint-disable no-useless-catch */
-import { slugify } from '~/utils/formatters'
+import { formatters } from '~/utils/formatters'
 
 const createNew = async (reqBody) => {
   try {
     const newBoard = {
       ...reqBody,
-      slug: slugify(reqBody.title)
+      slug: formatters.slugify(reqBody.title)
     }
 
     return newBoard
