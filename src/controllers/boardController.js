@@ -3,16 +3,25 @@ import { boardService } from '~/services/boardService'
 
 const createNew = async (req, res, next) => {
   try {
-    // console.log(req.body)
-
     const createdBoard = await boardService.createNew(req.body)
 
-    res.status(StatusCodes.OK).json(createdBoard)
+    res.status(StatusCodes.CREATED).json(createdBoard)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const getDetails = async (req, res, next) => {
+  try {
+    const detailsBoard = await boardService.getDetails(req.params.id)
+
+    res.status(StatusCodes.OK).json(detailsBoard)
   } catch (error) {
     next(error)
   }
 }
 
 export const boardController = {
-  createNew
+  createNew,
+  getDetails
 }
