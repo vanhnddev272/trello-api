@@ -1,6 +1,8 @@
 import { StatusCodes } from 'http-status-codes'
 import { cloneDeep } from 'lodash'
 import { boardModel } from '~/models/boardModel'
+import { cardModel } from '~/models/cardModel'
+import { columnModel } from '~/models/columnModel'
 import ApiError from '~/utils/ApiError'
 import { formatters } from '~/utils/formatters'
 
@@ -12,9 +14,7 @@ const createNew = async (reqBody) => {
     }
 
     const createdBoard = await boardModel.createNew(newBoard)
-    const findNewBoard = await boardModel.findOneById(createdBoard.insertedId)
-
-    return findNewBoard
+    return await boardModel.findOneById(createdBoard.insertedId)
   } catch (error) {
     throw error
   }
@@ -40,7 +40,41 @@ const getDetails = async (boardId) => {
   }
 }
 
+const updateBoard = async (boardId, reqBody) => {
+  try {
+    const updateData = {
+      ...reqBody,
+      updatedAt: formatters.formatted_date()
+    }
+    return await boardModel.updateBoard(boardId, updateData)
+  } catch (error) {
+    throw error
+  }
+}
+
+const moveCardToDifferentColumn = async (reqBody) => {
+  try {
+    await columnModel.updateColumn(reqBody.prevColumnId, {
+      cardOrderIds: reqBody.prevCardOrderIds,
+      updatedAt: formatters.formatted_date()
+    })
+
+    await columnModel.updateColumn(reqBody.nextColumnId, {
+      cardOrderIds: reqBody.nextCardOrderIds,
+      updatedAt: formatters.formatted_date()
+    })
+
+    await cardModel.updateCard(reqBody.currentCardId, {
+      columnId: reqBody.nextColumnId
+    })
+  } catch (error) {
+    throw error
+  }
+}
+
 export const boardService = {
   createNew,
-  getDetails
+  getDetails,
+  updateBoard,
+  moveCardToDifferentColumn
 }
