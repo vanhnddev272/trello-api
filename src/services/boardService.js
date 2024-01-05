@@ -67,6 +67,8 @@ const moveCardToDifferentColumn = async (reqBody) => {
     await cardModel.updateCard(reqBody.currentCardId, {
       columnId: reqBody.nextColumnId
     })
+
+    return { updatedResult: 'Successfully' }
   } catch (error) {
     throw error
   }
