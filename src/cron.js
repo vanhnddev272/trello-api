@@ -1,8 +1,8 @@
 import https from 'https'
-import cron from 'cron'
+import { CronJob } from 'cron'
 
 const backendUrl = 'https://trello-api-3u3x.onrender.com'
-export const job = new cron.CronJob('*/14 * * * *', function () {
+export const job = new CronJob('*/14 * * * *', function () {
   console.log('Restarting server')
 
   https
@@ -16,4 +16,4 @@ export const job = new cron.CronJob('*/14 * * * *', function () {
     .on('error', (err) => {
       console.error('Error during restart: ', err.message)
     })
-})
+}, null, true, 'Asia/Ho_Chi_Minh')
