@@ -7,6 +7,7 @@ import { API_V1 } from '~/routes/v1'
 import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware'
 import { formatters } from './utils/formatters'
 import { corsOptions } from './config/cors'
+import { job } from './cron'
 
 const START_SERVER = () => {
   const app = express()
@@ -45,6 +46,7 @@ const START_SERVER = () => {
   try {
     await CONNECT_DB()
     START_SERVER()
+    job.start()
   } catch (error) {
     console.log(error)
     process.exit(0)
