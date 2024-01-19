@@ -1,8 +1,10 @@
 import { StatusCodes } from 'http-status-codes'
+import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import { authModel } from '~/models/authModel'
 import ApiError from '~/utils/ApiError'
 import { generateToken } from '~/utils/jwt_helpers'
+import { env } from '~/config/environment'
 
 const login = async (reqBody) => {
   try {
@@ -47,9 +49,11 @@ const register = async (reqBody) => {
   }
 }
 
-const generateRefreshToken = async (reqBody) => {
+const requestRefreshToken = async (oldRefreshToken, reqBody) => {
   try {
-    return (await generateToken(reqBody)).refreshToken
+    jwt.verify(oldRefreshToken, env.JWT_REFRESH_SECRET)
+    const token = await generateToken(reqBody)
+    return token
   } catch (error) {
     throw error
   }
@@ -58,5 +62,5 @@ const generateRefreshToken = async (reqBody) => {
 export const authService = {
   login,
   register,
-  generateRefreshToken
+  requestRefreshToken
 }

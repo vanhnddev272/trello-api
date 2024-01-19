@@ -1,11 +1,15 @@
 import { StatusCodes } from 'http-status-codes'
 import { authService } from '~/services/authService'
+import { generateToken } from '~/utils/jwt_helpers'
+
+let refreshTokens = [] //instead of REDIS
 
 const login = async (req, res, next) => {
   try {
-    const loginUser = await authService.login(req.body)
-    const refreshToken = await authService.generateRefreshToken(req.body)
+    const user = await authService.login(req.body)
+    const refreshToken = (await generateToken(req.body)).refreshToken
 
+    refreshTokens.push(refreshToken)
     let options = {
       httpOnly: true,
       secure: false,
@@ -14,7 +18,7 @@ const login = async (req, res, next) => {
     res.cookie('refreshToken', refreshToken, options)
     res.status(StatusCodes.OK).json({
       message: 'Logged successfully',
-      loginUser
+      user
     })
   } catch (error) {
     next(error)
@@ -34,7 +38,44 @@ const register = async (req, res, next) => {
   }
 }
 
+const requestRefreshToken = async (req, res, next) => {
+  try {
+    const oldRefreshToken = req.cookies.refreshToken
+    if (!oldRefreshToken) return res.status(StatusCodes.UNAUTHORIZED).json('You are not authenticated')
+    if (!refreshTokens.includes(oldRefreshToken)) {
+      res.status(StatusCodes.FORBIDDEN).json('Refresh token is not valid')
+    }
+
+    const token = await authService.requestRefreshToken(oldRefreshToken, req.body)
+    const { accessToken, refreshToken } = token
+    refreshTokens = refreshTokens.filter((token) => token !== oldRefreshToken)
+    refreshTokens.push(refreshToken)
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict'
+    })
+    res.status(StatusCodes.OK).json({ accessToken: accessToken })
+  } catch (error) {
+    next(error)
+  }
+}
+const logout = async (req, res, next) => {
+  try {
+    res.clearCookie('refreshToken')
+    refreshTokens = refreshTokens.filter((token) => token !== req.cookies.refreshToken)
+
+    res.status(StatusCodes.CREATED).json({
+      message: 'Logout successfully'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const authController = {
   login,
-  register
+  register,
+  requestRefreshToken,
+  logout
 }

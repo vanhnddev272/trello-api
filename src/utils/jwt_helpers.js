@@ -4,7 +4,9 @@ import { env } from '~/config/environment'
 export const generateToken = async (user) => {
   try {
     const payload = {
-      id: user._id
+      id: user._id,
+      email: user.email,
+      generateTime: Date()
     }
     const accessToken = jwt.sign(payload, env.JWT_ACCESS_SECRET, {
       expiresIn: '1d'

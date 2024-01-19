@@ -1,6 +1,7 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { boardController } from '~/controllers/boardController'
+import jwtMiddleware from '~/middlewares/authMiddleware'
 import { boardValidation } from '~/validations/boardValidation'
 
 const router = express.Router()
@@ -14,7 +15,7 @@ router.route('/')
   .post(boardValidation.createNew, boardController.createNew)
 
 router.route('/:id')
-  .get(boardController.getDetails)
+  .get(jwtMiddleware.verifyToken, boardController.getDetails)
   .put(boardValidation.update, boardController.updateBoard)
 
 router.route('/supports/move_card')
