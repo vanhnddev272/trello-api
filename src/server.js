@@ -2,13 +2,14 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import exitHook from 'async-exit-hook'
-import { CLOSE_DB, CONNECT_DB } from '~/config/mongodb'
-import { env } from '~/config/environment'
+import { CLOSE_DB, CONNECT_DB } from '~/config/mongodb.config'
+import { env } from '~/config/environment.config'
 import { API_V1 } from '~/routes/v1'
 import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware'
 import { formatters } from './utils/formatters'
-import { corsOptions } from './config/cors'
+import { corsOptions } from './config/cors.config'
 import { job } from './cron'
+// import session from 'express-session'
 
 const START_SERVER = () => {
   const app = express()
@@ -16,6 +17,15 @@ const START_SERVER = () => {
   app.use(cors(corsOptions))
   app.use(express.json())
   app.use(cookieParser())
+  // app.set('trust proxy', 1) // trust first proxy
+  // app.use(session({
+  //   secret: 'keyboard cat',
+  //   resave: false,
+  //   saveUninitialized: true,
+  //   cookie: {
+  //     secure: false
+  //   }
+  // }))
   app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')

@@ -1,5 +1,5 @@
 import { MongoClient, ServerApiVersion } from 'mongodb'
-import { env } from '~/config/environment'
+import { env } from '~/config/environment.config'
 
 let trelloDatabaseInstance = null
 

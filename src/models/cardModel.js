@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import { ObjectId } from 'mongodb'
-import { GET_DB } from '~/config/mongodb'
+import { GET_DB } from '~/config/mongodb.config'
 import { formatters } from '~/utils/formatters'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
@@ -20,6 +20,7 @@ const CARD_COLLECTION_SCHEMA = Joi.object({
     .trim()
     .strict(),
   description: Joi.string().optional(),
+  attachments: Joi.array().optional(),
   createdAt: Joi.date().timestamp('javascript').default(formatters.formatted_date()),
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)

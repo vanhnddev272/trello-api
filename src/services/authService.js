@@ -1,10 +1,8 @@
 import { StatusCodes } from 'http-status-codes'
-import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import { authModel } from '~/models/authModel'
 import ApiError from '~/utils/ApiError'
-import { generateToken } from '~/utils/jwt_helpers'
-import { env } from '~/config/environment'
+import { generateToken, verifyRefreshToken } from '~/utils/jwt_helpers'
 
 const login = async (reqBody) => {
   try {
@@ -22,11 +20,12 @@ const login = async (reqBody) => {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Invalid email or password. Please try again with the correct credentials!')
     }
 
-    const { accessToken } = await generateToken(reqBody)
+    const { accessToken, refreshToken } = await generateToken(reqBody)
 
     return {
       loginUser,
-      accessToken
+      accessToken,
+      refreshToken
     }
   } catch (error) {
     throw error
@@ -51,9 +50,26 @@ const register = async (reqBody) => {
 
 const requestRefreshToken = async (oldRefreshToken, reqBody) => {
   try {
-    jwt.verify(oldRefreshToken, env.JWT_REFRESH_SECRET)
+    await verifyRefreshToken(oldRefreshToken)
     const token = await generateToken(reqBody)
     return token
+  } catch (error) {
+    throw error
+  }
+}
+
+const logout = async (refreshToken) => {
+  try {
+    await verifyRefreshToken(refreshToken)
+  } catch (error) {
+    throw error
+  }
+}
+
+const findUserLogged = async (username) => {
+  try {
+    return await authModel.findUserByUsername(username)
+
   } catch (error) {
     throw error
   }
@@ -62,5 +78,7 @@ const requestRefreshToken = async (oldRefreshToken, reqBody) => {
 export const authService = {
   login,
   register,
-  requestRefreshToken
+  requestRefreshToken,
+  logout,
+  findUserLogged
 }

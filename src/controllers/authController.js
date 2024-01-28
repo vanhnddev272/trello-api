@@ -1,25 +1,27 @@
 import { StatusCodes } from 'http-status-codes'
+import { connectToRedis } from '~/config/redis.config'
 import { authService } from '~/services/authService'
-import { generateToken } from '~/utils/jwt_helpers'
-
-let refreshTokens = [] //instead of REDIS
 
 const login = async (req, res, next) => {
   try {
-    const user = await authService.login(req.body)
-    const refreshToken = (await generateToken(req.body)).refreshToken
+    const loginUser = await authService.login(req.body)
+    // const refreshToken = (await generateToken(req.body)).refreshToken
 
-    refreshTokens.push(refreshToken)
-    let options = {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'strict'
-    }
-    res.cookie('refreshToken', refreshToken, options)
-    res.status(StatusCodes.OK).json({
-      message: 'Logged successfully',
-      user
-    })
+    // let options = {
+    //   httpOnly: true,
+    //   secure: false,
+    //   sameSite: 'none'
+    // }
+    const client = connectToRedis()
+    const { refreshToken, ...user } = loginUser
+    client.set(user.loginUser._id.toString(), refreshToken, 'EX', 365 * 24 * 60 * 60)
+
+    res
+      // .cookie('refreshToken', refreshToken, options)
+      .status(StatusCodes.OK).json({
+        message: 'Logged successfully',
+        user
+      })
   } catch (error) {
     next(error)
   }
@@ -40,33 +42,46 @@ const register = async (req, res, next) => {
 
 const requestRefreshToken = async (req, res, next) => {
   try {
-    const oldRefreshToken = req.cookies.refreshToken
-    if (!oldRefreshToken) return res.status(StatusCodes.UNAUTHORIZED).json('You are not authenticated')
-    if (!refreshTokens.includes(oldRefreshToken)) {
-      res.status(StatusCodes.FORBIDDEN).json('Refresh token is not valid')
-    }
+    const userLogged = await authService.findUserLogged(req.body.username)
+    const client = connectToRedis()
+    client.get(userLogged._id.toString(), async (err, result) => {
+      if (err) {
+        next(err)
+      }
+      const oldRefreshToken = result
+      if (!oldRefreshToken) {
+        return res.status(StatusCodes.UNAUTHORIZED).json('You are not authenticated!')
+      }
 
-    const token = await authService.requestRefreshToken(oldRefreshToken, req.body)
-    const { accessToken, refreshToken } = token
-    refreshTokens = refreshTokens.filter((token) => token !== oldRefreshToken)
-    refreshTokens.push(refreshToken)
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'strict'
+      const token = await authService.requestRefreshToken(oldRefreshToken, req.body)
+      const { accessToken, refreshToken } = token
+      // let options = {
+      //   httpOnly: true,
+      //   secure: false,
+      //   sameSite: 'none'
+      // }
+      client.set(userLogged._id.toString(), refreshToken, 'EX', 365 * 24 * 60 * 60)
+      res
+        // .cookie('refreshToken', refreshToken, options)
+        .status(StatusCodes.OK).json({ accessToken: accessToken })
     })
-    res.status(StatusCodes.OK).json({ accessToken: accessToken })
   } catch (error) {
     next(error)
   }
 }
+
 const logout = async (req, res, next) => {
   try {
-    res.clearCookie('refreshToken')
-    refreshTokens = refreshTokens.filter((token) => token !== req.cookies.refreshToken)
-
-    res.status(StatusCodes.CREATED).json({
-      message: 'Logout successfully'
+    // res.clearCookie('refreshToken')
+    const userLogged = await authService.findUserLogged(req.body.username)
+    const client = connectToRedis()
+    client.del(userLogged._id.toString(), (err, reply) => {
+      if (err) {
+        next(err)
+      }
+      res.status(StatusCodes.CREATED).json({
+        message: 'Logout successfully'
+      })
     })
   } catch (error) {
     next(error)

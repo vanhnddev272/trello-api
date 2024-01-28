@@ -17,7 +17,9 @@ const createNew = async (req, res, next) => {
       .required()
       .max(50)
       .trim()
-      .strict()
+      .strict(),
+    description: Joi.string().optional(),
+    attachments: Joi.array().optional()
   })
 
   try {

@@ -21,4 +21,5 @@ router.route('/:id')
 router.route('/supports/move_card')
   .put(boardValidation.moveCardToDifferentColumn, boardController.moveCardToDifferentColumn)
 
+
 export const boardRoutes = router
