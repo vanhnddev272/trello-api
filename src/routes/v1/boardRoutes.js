@@ -1,5 +1,6 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
+import { fileUploader } from '~/config/multer.config'
 import { boardController } from '~/controllers/boardController'
 import jwtMiddleware from '~/middlewares/authMiddleware'
 import { boardValidation } from '~/validations/boardValidation'
@@ -17,6 +18,9 @@ router.route('/')
 router.route('/:id')
   .get(jwtMiddleware.verifyToken, boardController.getDetails)
   .put(boardValidation.update, boardController.updateBoard)
+
+router.route('/:id/upload-bg')
+  .post(fileUploader.single('file'), boardController.uploadBackground)
 
 router.route('/supports/move_card')
   .put(boardValidation.moveCardToDifferentColumn, boardController.moveCardToDifferentColumn)

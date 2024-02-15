@@ -74,9 +74,22 @@ const moveCardToDifferentColumn = async (reqBody) => {
   }
 }
 
+const updateBackground = async (boardId, updateBg) => {
+  try {
+    const updateData = {
+      updateBg,
+      updatedAt: formatters.formatted_date()
+    }
+    return await boardModel.updateBackground(boardId, updateData)
+  } catch (error) {
+    throw error
+  }
+}
+
 export const boardService = {
   createNew,
   getDetails,
   updateBoard,
-  moveCardToDifferentColumn
+  moveCardToDifferentColumn,
+  updateBackground
 }

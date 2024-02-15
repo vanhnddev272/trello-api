@@ -41,9 +41,23 @@ const moveCardToDifferentColumn = async (req, res, next) => {
   }
 }
 
+const uploadBackground = async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(StatusCodes.BAD_REQUEST).json({ error: 'No file uploaded' })
+    await boardService.updateBackground(req.params.id, req.file.path )
+
+    return res.status(StatusCodes.OK).json({
+      secure_url: req.file.path
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const boardController = {
   createNew,
   getDetails,
   updateBoard,
-  moveCardToDifferentColumn
+  moveCardToDifferentColumn,
+  uploadBackground
 }

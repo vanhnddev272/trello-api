@@ -31,6 +31,8 @@ const BOARD_COLLECTION_SCHEMA = Joi.object({
       .pattern(OBJECT_ID_RULE)
       .message(OBJECT_ID_RULE_MESSAGE))
     .default([]),
+  background: Joi.array()
+    .items(Joi.string()),
   createdAt: Joi.date().timestamp('javascript').default(formatters.formatted_date()),
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)
@@ -127,6 +129,19 @@ const deleteColumnOrderIds = async (column) => {
   } catch (error) { throw new Error(error) }
 }
 
+const updateBackground = async (boardId, updateData) => {
+  try {
+    return await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id: new ObjectId(boardId) },
+      {
+        $set: { updatedAt: updateData.updatedAt },
+        $push: { background: updateData.updateBg }
+      },
+      { returnDocument: 'after' }
+    )
+  } catch (error) { throw new Error(error) }
+}
+
 export const boardModel = {
   BOARD_COLLECTION_NAME,
   BOARD_COLLECTION_SCHEMA,
@@ -135,5 +150,6 @@ export const boardModel = {
   getDetailsBoard,
   pushColumnOrderIds,
   updateBoard,
-  deleteColumnOrderIds
+  deleteColumnOrderIds,
+  updateBackground
 }
