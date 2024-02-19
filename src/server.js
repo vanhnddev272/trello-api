@@ -58,7 +58,10 @@ const START_SERVER = () => {
   try {
     await CONNECT_DB()
     START_SERVER()
-    job.start()
+    if (env.BUILD_MODE === 'production') {
+      console.log('Starting cron job ...')
+      job.start()
+    }
   } catch (error) {
     console.log(error)
     process.exit(0)
